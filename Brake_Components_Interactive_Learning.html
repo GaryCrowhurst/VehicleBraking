@@ -1,0 +1,748 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Brake Components Learning - Interactive Workbook</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+      background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+      min-height: 100vh;
+      padding-bottom: 3rem;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 1rem;
+    }
+
+    .app-header {
+      background: linear-gradient(90deg, #dc2626 0%, #ef4444 100%);
+      padding: 1.5rem;
+      border-radius: 12px;
+      margin-bottom: 1rem;
+      box-shadow: 0 4px 12px rgba(220, 38, 38, 0.3);
+      color: white;
+    }
+
+    .app-header h1 {
+      font-size: 1.5rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .progress-bar {
+      margin-top: 1rem;
+      background: rgba(255, 255, 255, 0.2);
+      height: 30px;
+      border-radius: 15px;
+      overflow: hidden;
+    }
+
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #10b981 0%, #059669 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: width 0.3s ease;
+      min-width: 60px;
+    }
+
+    .progress-text {
+      font-weight: bold;
+      font-size: 0.85rem;
+      text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
+    }
+
+    .instructions {
+      background: #fef3c7;
+      border: 2px solid #fbbf24;
+      border-radius: 8px;
+      padding: 1rem;
+      margin-bottom: 1rem;
+    }
+
+    .system-selector {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.75rem;
+      margin-bottom: 1rem;
+    }
+
+    .system-btn {
+      padding: 1rem;
+      background: white;
+      border: 3px solid #e5e7eb;
+      border-radius: 10px;
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 1rem;
+      transition: all 0.2s;
+    }
+
+    .system-btn.active {
+      background: linear-gradient(90deg, #dc2626 0%, #ef4444 100%);
+      border-color: #dc2626;
+      color: white;
+    }
+
+    .action-bar {
+      display: flex;
+      gap: 0.5rem;
+      margin-bottom: 1rem;
+    }
+
+    .action-btn {
+      flex: 1;
+      padding: 0.75rem;
+      background: white;
+      border: 2px solid #e5e7eb;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 0.85rem;
+    }
+
+    .components-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 1rem;
+    }
+
+    .component-card {
+      background: white;
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+      cursor: pointer;
+      transition: all 0.2s;
+      border: 3px solid transparent;
+      position: relative;
+    }
+
+    .component-card.incomplete {
+      opacity: 0.6;
+      filter: grayscale(0.5);
+    }
+
+    .component-card.complete {
+      border-color: #10b981;
+    }
+
+    .component-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
+    }
+
+    .card-status {
+      position: absolute;
+      top: 0.75rem;
+      right: 0.75rem;
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1;
+      font-weight: bold;
+    }
+
+    .complete .card-status {
+      background: #10b981;
+      color: white;
+    }
+
+    .incomplete .card-status {
+      background: #ef4444;
+      color: white;
+    }
+
+    .card-image-area {
+      height: 180px;
+      background: #f3f4f6;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+    }
+
+    .card-image {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .card-image-placeholder {
+      text-align: center;
+      color: #9ca3af;
+    }
+
+    .card-title {
+      padding: 1rem;
+      font-size: 1.1rem;
+      color: #1f2937;
+      background: #fef2f2;
+      border-bottom: 2px solid #fecaca;
+    }
+
+    .card-fields {
+      padding: 1rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+
+    .field {
+      padding: 0.5rem;
+      border-radius: 6px;
+      font-size: 0.85rem;
+      font-weight: 500;
+    }
+
+    .field.empty {
+      background: #1f2937;
+      color: #6b7280;
+    }
+
+    .field.filled {
+      background: #d1fae5;
+      color: #065f46;
+    }
+
+    /* Modal */
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.7);
+      z-index: 1000;
+      overflow-y: auto;
+      padding: 1rem;
+    }
+
+    .modal.active {
+      display: block;
+    }
+
+    .modal-content {
+      background: white;
+      border-radius: 12px;
+      max-width: 600px;
+      margin: 2rem auto;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    }
+
+    .modal-header {
+      background: linear-gradient(90deg, #dc2626 0%, #ef4444 100%);
+      padding: 1.5rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      color: white;
+    }
+
+    .close-btn {
+      background: rgba(255, 255, 255, 0.2);
+      border: none;
+      color: white;
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      font-size: 1.5rem;
+      cursor: pointer;
+    }
+
+    .modal-body {
+      padding: 1.5rem;
+    }
+
+    .editor-section {
+      margin-bottom: 1.5rem;
+    }
+
+    .section-label {
+      display: block;
+      font-weight: 700;
+      font-size: 1rem;
+      color: #1f2937;
+      margin-bottom: 0.5rem;
+    }
+
+    .hint {
+      font-size: 0.85rem;
+      color: #6b7280;
+      font-style: italic;
+      margin-bottom: 0.75rem;
+    }
+
+    .image-upload-area {
+      background: #f9fafb;
+      border: 2px dashed #d1d5db;
+      border-radius: 8px;
+      padding: 1.5rem;
+      text-align: center;
+    }
+
+    .upload-buttons {
+      display: flex;
+      gap: 1rem;
+    }
+
+    .upload-btn {
+      flex: 1;
+      padding: 1rem;
+      border: 2px solid #dc2626;
+      background: white;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 600;
+      color: #dc2626;
+    }
+
+    .uploaded-image {
+      width: 100%;
+      max-height: 300px;
+      object-fit: contain;
+      border-radius: 8px;
+      margin-bottom: 1rem;
+    }
+
+    .change-image-btn {
+      padding: 0.5rem 1rem;
+      background: #dc2626;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: 600;
+    }
+
+    textarea {
+      width: 100%;
+      padding: 0.75rem;
+      border: 2px solid #e5e7eb;
+      border-radius: 8px;
+      font-size: 1rem;
+      font-family: inherit;
+      resize: vertical;
+    }
+
+    textarea:focus {
+      outline: none;
+      border-color: #dc2626;
+    }
+
+    .modal-actions {
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+      margin-top: 2rem;
+    }
+
+    .modal-action-btn {
+      padding: 1rem;
+      border: none;
+      border-radius: 8px;
+      font-weight: 600;
+      font-size: 1rem;
+      cursor: pointer;
+    }
+
+    .auto-fill-btn {
+      background: #3b82f6;
+      color: white;
+    }
+
+    .save-btn {
+      background: #10b981;
+      color: white;
+    }
+
+    .save-btn.disabled {
+      background: #ef4444;
+      cursor: not-allowed;
+    }
+
+    @media (max-width: 768px) {
+      .components-grid {
+        grid-template-columns: 1fr;
+      }
+      .system-selector {
+        grid-template-columns: 1fr;
+      }
+      .upload-buttons {
+        flex-direction: column;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="app-header">
+      <h1>🔧 Brake Components Learning</h1>
+      <p>City & Guilds 7290 - Interactive Workbook</p>
+      <div class="progress-bar">
+        <div class="progress-fill" id="progress-fill">
+          <span class="progress-text" id="progress-text">0% Complete</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="instructions">
+      <strong>How it works:</strong> Take or upload an image of each component, then fill in at least ONE field. 
+      The app will auto-fill the rest! Complete all components to master brake systems.
+    </div>
+
+    <div class="system-selector">
+      <button class="system-btn active" onclick="selectSystem('disc')">Disc Brake System</button>
+      <button class="system-btn" onclick="selectSystem('drum')">Drum Brake System</button>
+    </div>
+
+    <div class="action-bar">
+      <button class="action-btn" onclick="resetProgress()">🔄 Reset Progress</button>
+      <button class="action-btn" onclick="exportData()">💾 Export Data</button>
+    </div>
+
+    <div id="components-grid" class="components-grid"></div>
+  </div>
+
+  <!-- Modal -->
+  <div id="modal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2 id="modal-title">Component</h2>
+        <button class="close-btn" onclick="closeModal()">×</button>
+      </div>
+      <div class="modal-body">
+        <div class="editor-section">
+          <label class="section-label">📸 Component Image *</label>
+          <div class="image-upload-area" id="image-area"></div>
+          <input type="file" id="camera-input" accept="image/*" capture="environment" style="display:none" onchange="handleImageUpload(event)">
+          <input type="file" id="file-input" accept="image/*" style="display:none" onchange="handleImageUpload(event)">
+        </div>
+
+        <div class="editor-section">
+          <label class="section-label">👁️ Visual Description</label>
+          <p class="hint" id="hint-visual"></p>
+          <textarea id="input-visual" rows="3" placeholder="Describe what you see..."></textarea>
+        </div>
+
+        <div class="editor-section">
+          <label class="section-label">⚙️ Function</label>
+          <p class="hint" id="hint-function"></p>
+          <textarea id="input-function" rows="3" placeholder="What does this component do?"></textarea>
+        </div>
+
+        <div class="editor-section">
+          <label class="section-label">🔧 Operation</label>
+          <p class="hint" id="hint-operation"></p>
+          <textarea id="input-operation" rows="3" placeholder="How does it work?"></textarea>
+        </div>
+
+        <div class="modal-actions">
+          <button class="modal-action-btn auto-fill-btn" onclick="autoFill()">🔓 Auto-Fill Missing Fields</button>
+          <button class="modal-action-btn save-btn" id="save-btn" onclick="saveComponent()">✓ Complete</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Component definitions
+    const componentData = {
+      disc: {
+        'brake-disc': {
+          name: 'Brake Disc (Rotor)',
+          visualDescription: 'Circular metal disc with ventilation vanes between two friction surfaces, typically 250-380mm diameter, with mounting holes in the center hub',
+          function: 'Provides friction surface for brake pads to clamp against, converting kinetic energy to heat',
+          operation: 'Rotates with the wheel. When brakes applied, pads clamp both faces creating friction. Ventilation vanes dissipate heat',
+          hints: { visualDescription: 'Describe what you see: shape, color, size, any holes or vents', function: 'What does this component do? What is its job?', operation: 'How does it work? What happens when brakes are applied?' }
+        },
+        'brake-caliper': {
+          name: 'Brake Caliper',
+          visualDescription: 'Red or metallic housing that straddles the disc edge, rectangular shape with pistons visible, bleeder valve on top',
+          function: 'Houses pistons and brake pads; converts hydraulic pressure into mechanical clamping force',
+          operation: 'Straddles disc at top. Hydraulic pressure pushes pistons outward, forcing pads against disc faces',
+          hints: { visualDescription: 'What color is it? Where is it positioned? What shape?', function: 'What does the caliper contain? What does it convert?', operation: 'Where is it mounted? What moves when brakes are applied?' }
+        },
+        'brake-pads': {
+          name: 'Brake Pads',
+          visualDescription: 'Flat rectangular blocks with golden/brown friction material bonded to steel backing plate, about 10mm thick when new',
+          function: 'Create friction against disc faces to slow the vehicle through contact and heat generation',
+          operation: 'Positioned either side of disc. Pistons push pads against rotating disc creating friction and heat',
+          hints: { visualDescription: 'What color is the friction material? How thick? What is the backing made of?', function: 'What do pads create? Against what surface?', operation: 'Where are they positioned? What pushes them?' }
+        },
+        'caliper-pistons': {
+          name: 'Caliper Pistons',
+          visualDescription: 'Cylindrical metal pistons (silver or blue), 30-60mm diameter, with rubber dust boots at the base',
+          function: 'Push brake pads against disc faces using hydraulic pressure from the brake fluid',
+          operation: 'Sit behind pads inside caliper. Hydraulic pressure forces them outward, moving pads toward disc',
+          hints: { visualDescription: 'What shape? What material? What protects them?', function: 'What do pistons push? What type of pressure moves them?', operation: 'Where are they located? Which direction do they move?' }
+        },
+        'wheel-hub': {
+          name: 'Wheel Hub Assembly',
+          visualDescription: 'Central circular mounting with 4-6 wheel studs protruding, gray metal, contains bearing assembly in center',
+          function: 'Mounting point for brake disc and wheel; contains bearings that allow rotation',
+          operation: 'Disc bolts to hub flange. Hub rotates on bearings. Wheel mounts over disc with lug nuts',
+          hints: { visualDescription: 'How many studs? What color? What is in the center?', function: 'What mounts to it? What does it contain?', operation: 'What connects to the hub? How does it rotate?' }
+        },
+        'brake-fluid': {
+          name: 'Brake Fluid',
+          visualDescription: 'Clear to amber hydraulic fluid in translucent reservoir, glycol-based with specific DOT rating visible on cap',
+          function: 'Transmits hydraulic pressure from master cylinder to calipers throughout the brake system',
+          operation: 'Master cylinder pressurizes fluid when pedal pressed. Incompressible fluid instantly transfers force to all calipers',
+          hints: { visualDescription: 'What color? Where is it stored? What is on the cap?', function: 'What does it transmit? From where to where?', operation: 'What pressurizes it? What property allows force transfer?' }
+        }
+      },
+      drum: {
+        'brake-drum': {
+          name: 'Brake Drum',
+          visualDescription: 'Cylindrical metal housing, 200-300mm diameter, open at back, smooth inner friction surface',
+          function: 'Provides friction surface and houses brake shoes; rotates with the wheel',
+          operation: 'Rotates with wheel. Shoes press outward against inner surface when hydraulic pressure applied',
+          hints: { visualDescription: 'What shape? How big? Where is it open?', function: 'What does it contain? What does it provide?', operation: 'What rotates with it? What presses against it?' }
+        },
+        'brake-shoes': {
+          name: 'Brake Shoes',
+          visualDescription: 'Semi-circular curved metal with brown/black friction lining on outer edge, leading and trailing shoe arrangement',
+          function: 'Press against drum inner surface to create friction and slow the vehicle',
+          operation: 'Wheel cylinder pushes shoes outward against drum. Leading shoe self-servo action provides most force',
+          hints: { visualDescription: 'What shape? What covers the surface? How many?', function: 'What do they press against? What do they create?', operation: 'What pushes them? Which shoe does more work?' }
+        },
+        'wheel-cylinder': {
+          name: 'Wheel Cylinder',
+          visualDescription: 'Small cylindrical housing at top of backing plate, two pistons visible at ends, bleeder valve on top',
+          function: 'Converts hydraulic pressure to mechanical force that pushes brake shoes outward',
+          operation: 'Located at top between shoes. Hydraulic pressure forces two pistons outward simultaneously',
+          hints: { visualDescription: 'Where is it positioned? What is visible? What is on top?', function: 'What type of pressure? What does it push?', operation: 'Where is it located? How many pistons? Which direction?' }
+        },
+        'return-springs': {
+          name: 'Return Springs',
+          visualDescription: 'Heavy coil springs connecting top and bottom of brake shoes, typically silver or colored metal',
+          function: 'Pull brake shoes away from drum when hydraulic pressure is released',
+          operation: 'Strong tension pulls shoes inward when pedal released, preventing brake drag',
+          hints: { visualDescription: 'What connects them? What material? Where positioned?', function: 'What do they pull? When do they activate?', operation: 'Which direction do they pull? What do they prevent?' }
+        },
+        'adjuster': {
+          name: 'Adjuster Mechanism',
+          visualDescription: 'Threaded rod or star wheel at bottom between shoes, can be rotated with brake spoon tool',
+          function: 'Maintains correct clearance between shoes and drum as linings wear',
+          operation: 'Extends as linings wear thin. Automatic types ratchet during reverse braking. Manual types need periodic adjustment',
+          hints: { visualDescription: 'Where is it located? What shape? What tool adjusts it?', function: 'What does it maintain? What wears?', operation: 'When does it extend? What are the two types?' }
+        }
+      }
+    };
+
+    let currentSystem = 'disc';
+    let currentComponent = null;
+    let userData = JSON.parse(localStorage.getItem('brakeComponentsProgress') || '{}');
+
+    function selectSystem(system) {
+      currentSystem = system;
+      document.querySelectorAll('.system-btn').forEach(btn => btn.classList.remove('active'));
+      event.target.classList.add('active');
+      renderComponents();
+    }
+
+    function renderComponents() {
+      const grid = document.getElementById('components-grid');
+      grid.innerHTML = '';
+      
+      Object.entries(componentData[currentSystem]).forEach(([id, def]) => {
+        const key = `${currentSystem}-${id}`;
+        const data = userData[key] || {};
+        const isComplete = data.image && (data.userOperation || data.userVisualDescription || data.userFunction);
+
+        const card = document.createElement('div');
+        card.className = `component-card ${isComplete ? 'complete' : 'incomplete'}`;
+        card.onclick = () => openModal(id);
+
+        card.innerHTML = `
+          <div class="card-status">${isComplete ? '✓' : '🔒'}</div>
+          <div class="card-image-area">
+            ${data.image ? `<img src="${data.image}" class="card-image" alt="${def.name}">` : '<div class="card-image-placeholder">📷<br>No Image</div>'}
+          </div>
+          <h3 class="card-title">${def.name}</h3>
+          <div class="card-fields">
+            <div class="field ${data.userVisualDescription ? 'filled' : 'empty'}">Visual Description ${data.userVisualDescription ? '✓' : ''}</div>
+            <div class="field ${data.userFunction ? 'filled' : 'empty'}">Function ${data.userFunction ? '✓' : ''}</div>
+            <div class="field ${data.userOperation ? 'filled' : 'empty'}">Operation ${data.userOperation ? '✓' : ''}</div>
+          </div>
+        `;
+
+        grid.appendChild(card);
+      });
+
+      updateProgress();
+    }
+
+    function openModal(componentId) {
+      currentComponent = componentId;
+      const key = `${currentSystem}-${componentId}`;
+      const def = componentData[currentSystem][componentId];
+      const data = userData[key] || {};
+
+      document.getElementById('modal-title').textContent = def.name;
+      document.getElementById('hint-visual').textContent = def.hints.visualDescription;
+      document.getElementById('hint-function').textContent = def.hints.function;
+      document.getElementById('hint-operation').textContent = def.hints.operation;
+
+      document.getElementById('input-visual').value = data.userVisualDescription || '';
+      document.getElementById('input-function').value = data.userFunction || '';
+      document.getElementById('input-operation').value = data.userOperation || '';
+
+      updateImageArea(data.image);
+      updateSaveButton();
+
+      document.getElementById('modal').classList.add('active');
+    }
+
+    function closeModal() {
+      document.getElementById('modal').classList.remove('active');
+      currentComponent = null;
+    }
+
+    function updateImageArea(image) {
+      const area = document.getElementById('image-area');
+      if (image) {
+        area.innerHTML = `
+          <img src="${image}" class="uploaded-image" alt="Component">
+          <button class="change-image-btn" onclick="changeImage()">Change Image</button>
+        `;
+      } else {
+        area.innerHTML = `
+          <div class="upload-buttons">
+            <button class="upload-btn" onclick="document.getElementById('camera-input').click()">📷 Take Photo</button>
+            <button class="upload-btn" onclick="document.getElementById('file-input').click()">📁 Upload Image</button>
+          </div>
+        `;
+      }
+    }
+
+    function changeImage() {
+      const key = `${currentSystem}-${currentComponent}`;
+      userData[key] = userData[key] || {};
+      userData[key].image = null;
+      updateImageArea(null);
+      saveData();
+    }
+
+    function handleImageUpload(event) {
+      const file = event.target.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onloadend = () => {
+          const key = `${currentSystem}-${currentComponent}`;
+          userData[key] = userData[key] || {};
+          userData[key].image = reader.result;
+          updateImageArea(reader.result);
+          updateSaveButton();
+          saveData();
+        };
+        reader.readAsDataURL(file);
+      }
+    }
+
+    function autoFill() {
+      const key = `${currentSystem}-${currentComponent}`;
+      const def = componentData[currentSystem][currentComponent];
+      
+      userData[key] = userData[key] || {};
+      userData[key].userVisualDescription = userData[key].userVisualDescription || def.visualDescription;
+      userData[key].userFunction = userData[key].userFunction || def.function;
+      userData[key].userOperation = userData[key].userOperation || def.operation;
+
+      document.getElementById('input-visual').value = userData[key].userVisualDescription;
+      document.getElementById('input-function').value = userData[key].userFunction;
+      document.getElementById('input-operation').value = userData[key].userOperation;
+
+      updateSaveButton();
+      saveData();
+    }
+
+    function saveComponent() {
+      const key = `${currentSystem}-${currentComponent}`;
+      userData[key] = userData[key] || {};
+      
+      userData[key].userVisualDescription = document.getElementById('input-visual').value;
+      userData[key].userFunction = document.getElementById('input-function').value;
+      userData[key].userOperation = document.getElementById('input-operation').value;
+
+      saveData();
+      closeModal();
+      renderComponents();
+    }
+
+    function updateSaveButton() {
+      const key = `${currentSystem}-${currentComponent}`;
+      const data = userData[key] || {};
+      const isComplete = data.image && (data.userOperation || data.userVisualDescription || data.userFunction);
+      
+      const btn = document.getElementById('save-btn');
+      if (isComplete) {
+        btn.classList.remove('disabled');
+        btn.textContent = '✓ Complete';
+      } else {
+        btn.classList.add('disabled');
+        btn.textContent = 'Need Image + 1 Field';
+      }
+    }
+
+    function saveData() {
+      localStorage.setItem('brakeComponentsProgress', JSON.stringify(userData));
+    }
+
+    function updateProgress() {
+      const total = Object.keys(componentData[currentSystem]).length;
+      const completed = Object.keys(componentData[currentSystem]).filter(id => {
+        const key = `${currentSystem}-${id}`;
+        const data = userData[key] || {};
+        return data.image && (data.userOperation || data.userVisualDescription || data.userFunction);
+      }).length;
+
+      const percent = Math.round((completed / total) * 100);
+      document.getElementById('progress-fill').style.width = percent + '%';
+      document.getElementById('progress-text').textContent = percent + '% Complete';
+    }
+
+    function resetProgress() {
+      if (confirm('Are you sure you want to reset all progress? This cannot be undone.')) {
+        userData = {};
+        localStorage.removeItem('brakeComponentsProgress');
+        renderComponents();
+      }
+    }
+
+    function exportData() {
+      const dataStr = JSON.stringify(userData, null, 2);
+      const dataBlob = new Blob([dataStr], { type: 'application/json' });
+      const url = URL.createObjectURL(dataBlob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = 'brake-components-progress.json';
+      link.click();
+    }
+
+    // Listen for input changes
+    document.addEventListener('DOMContentLoaded', () => {
+      renderComponents();
+      
+      ['input-visual', 'input-function', 'input-operation'].forEach(id => {
+        document.getElementById(id).addEventListener('input', updateSaveButton);
+      });
+    });
+  </script>
+</body>
+</html>
